@@ -90,8 +90,8 @@ def main():
                        'nomask': maskamount[1]
                        }
     # Here I am just trying to check whether I can post the data to our app
-    gg = requests.post(urlden, data = facecountstreaming)
-    zz = requests.post(urlmask, data = maskstreaming)
+    gg = requests.post(urlden, json = facecountstreaming)
+    zz = requests.post(urlmask, json = maskstreaming)
     if zz.status_code == requests.codes.ok:
       print('Mask Uploaded')
     # This print below is to show people count, amount of mask on and off manually on console, you can uncomment this part if you want to check values on console
