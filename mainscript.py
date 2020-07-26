@@ -16,24 +16,6 @@ import matplotlib.pyplot as plt
 
 ### Function definitons ###
 
-def peoplecounter(image):
-
-# import the necessary packages
-# this code is modified based on the one provided in this link: https://www.pyimagesearch.com/2015/11/09/pedestrian-detection-opencv/
-
-  hog = cv2.HOGDescriptor()
-  hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
-
-	# load the image and resize it to (1) reduce detection time
-	# and (2) improve detection accuracy
-  image = imutils.resize(image, width=min(400, image.shape[1]))
-  orig = image.copy()
-	# detect people in the image, we can adjust winStride and padding parameters to make it better
-  (rects, weights) = hog.detectMultiScale(image, winStride=(2, 2),
-	padding=(8, 8), scale=1.05)
-	# draw the original bounding boxes
-  return rects.shape[0]
-
 def faceDetectorImg(image):
     
     # Load the cascade
@@ -45,7 +27,9 @@ def faceDetectorImg(image):
     return faces
 
 def MaskDetector(image, tolerance):
-
+# I add tolerance add a new input here, which defines plus and minus pixel amount from the bounding box values.
+# Idea is when we have bounding box that detects the face part of the body, it can draw rectangle covering the whole face
+# but it can better to enlarge the covering area with the tolerance value. It justs enlarges the drawed box in both positive and negative directions.
     def prepImg(img):
       return cv2.resize(img,(224,224)).reshape(1,224,224,3)/255.0
   
@@ -62,7 +46,7 @@ def MaskDetector(image, tolerance):
         pred = model.predict(prepImg(slicedImg))
         pred = np.argmax(pred)
         if pred==0:
-          mascounter += 1
+          maskcounter += 1
         else:
           nomaskcounter += 1
     return [maskcounter, nomaskcounter]
@@ -72,36 +56,49 @@ def MaskDetector(image, tolerance):
 ### Main BODY ###
 
 def main():
-  #image here is to check resulting values over any example image. You can uncomment that part if you want to check it over a single image
+  # Here we can define a single image for test purposes, if you want to check it, you can uncomment below
   #image = cv2.imread('/content/drive/My Drive/Colab_Notebooks/test.jpg')
   urlden = 'https://a-team-mall-api.herokuapp.com/density'
   urlmask = 'https://a-team-mall-api.herokuapp.com/mask'
+ 
   while True:
-    #This part is essential, we can use fixed path for the camera or video.
-    cap = cv2.VideoCapture('path')
+    # Here I provided a link from https://www.insecam.org/, which is a good spot from Colorado, USA
+    cap = cv2.VideoCapture('http://208.139.200.133/mjpg/video.mjpg#.XxzWNVzDvVY.link')
     _, image = cap.read()
-    #peopcount = peoplecounter(image)
-    #densitystreaming = {'x': 70, 'y': 20, 'count': peopcount}
-    #requests.post(urlden, data = densitystreaming)
+
     facecount = faceDetectorImg(image)
-    facecount = facecount.shape[0]
-    facecountstreaming = {"x": 70, 
-                          "y": 20, 
-                          "count": facecount
-                          }
+    if len(facecount)==0:
+        facecountstreaming = {"x": 70, 
+                              "y": 20, 
+                              "count": 0
+                              }
+        maskstreaming = {'x': 70,
+                         'y': 20,
+                        'mask': 0,
+                        'nomask': 0
+                         }
+    else:
+      facecount = facecount.shape[0]
+      facecountstreaming = {"x": 70, 
+                            "y": 20, 
+                            "count": facecount
+                            }
+      # I used tolerance = 10 for the MaskDetector function, it can be adjusted	
+      maskamount = MaskDetector(image, 10)
+      maskstreaming = {'x': 70,
+                       'y': 20,
+                       'mask': maskamount[0],
+                       'nomask': maskamount[1]
+                       }
+    # Here I am just trying to check whether I can post the data to our app
     gg = requests.post(urlden, data = facecountstreaming)
-    if gg.status_code == requests.codes.ok:
-      print('Density Uploaded')
-    maskamount = MaskDetector(image, 10)
-    maskstreaming = {'x': 70,
-                     'y': 20,
-                     'mask': maskamount[0],
-                     'nomask': maskamount[1]
-                     }
     zz = requests.post(urlmask, data = maskstreaming)
     if zz.status_code == requests.codes.ok:
       print('Mask Uploaded')
-    print('Density: ' + str(facecount) + ', Mask On: ' + str(maskamount[0]) + ', Mask Off: ' + str(maskamount[1]))
+    # This print below is to show people count, amount of mask on and off manually on console, you can disable this part
+    print('Density: ' + str(facecountstreaming['count']) 
+    + ', Mask On: ' + str(maskstreaming['mask']) 
+    + ', Mask Off: ' + str(maskstreaming['nomask']))
     k = cv2.waitKey(30) & 0xff
     if k==27:
       break
@@ -112,3 +109,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
