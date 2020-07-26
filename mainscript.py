@@ -61,8 +61,10 @@ def main():
   while True:
     # Here I provided a link from https://www.insecam.org/, which is a good spot from Colorado, USA
     cap = cv2.VideoCapture('http://208.139.200.133/mjpg/video.mjpg#.XxzWNVzDvVY.link')
-    _, image = cap.read()
-
+    try:
+      _, image = cap.read()
+    except Exception as e:
+      continue
     facecount = faceDetectorImg(image)
     if len(facecount)==0:
         facecountstreaming = {"x": 70, 
