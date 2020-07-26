@@ -8,9 +8,6 @@ import imutils
 from tensorflow.keras.models import model_from_json
 import requests
 import json
-from google.colab import drive
-drive.mount('/content/drive')
-import matplotlib.pyplot as plt
 
 ### END ###
 
