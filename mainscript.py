@@ -92,10 +92,10 @@ def main():
     zz = requests.post(urlmask, data = maskstreaming)
     if zz.status_code == requests.codes.ok:
       print('Mask Uploaded')
-    # This print below is to show people count, amount of mask on and off manually on console, you can disable this part
-    print('Density: ' + str(facecountstreaming['count']) 
-    + ', Mask On: ' + str(maskstreaming['mask']) 
-    + ', Mask Off: ' + str(maskstreaming['nomask']))
+    # This print below is to show people count, amount of mask on and off manually on console, you can uncomment this part if you want to check values on console
+    #print('Density: ' + str(facecountstreaming['count']) 
+    #+ ', Mask On: ' + str(maskstreaming['mask']) 
+    #+ ', Mask Off: ' + str(maskstreaming['nomask']))
     k = cv2.waitKey(30) & 0xff
     if k==27:
       break
