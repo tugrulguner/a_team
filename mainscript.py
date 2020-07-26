@@ -29,11 +29,11 @@ def MaskDetector(image, tolerance):
 # but it can better to enlarge the covering area with the tolerance value. It justs enlarges the drawed box in both positive and negative directions.
     def prepImg(img):
       return cv2.resize(img,(224,224)).reshape(1,224,224,3)/255.0
-  
+    # Here we can upload our model architecture in json format by providing its path
     with open('/content/drive/My Drive/Colab_Notebooks/DATA/model_mask.json', 'r') as f:
       loadthehason = f.read()
     model = model_from_json(loadthehason)
-
+    # Here we can upload our weights manually through providing its path
     model.load_weights("/content/drive/My Drive/Colab_Notebooks/DATA/model_mask.h5")
     faces = faceDetectorImg(image)
     maskcounter = 0
