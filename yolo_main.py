@@ -11,8 +11,6 @@ import imutils
 from tensorflow.keras.models import model_from_json
 import requests
 import json
-from google.colab import drive
-drive.mount('/content/drive')
 import matplotlib.pyplot as plt
 
 ### END ###
@@ -189,20 +187,18 @@ def MaskDetector(bboxes, image, tolerance):
 ### Main BODY ###
 
 def main():
-	# base path to YOLO directory
-  #MODEL_PATH = '/content/drive/My Drive/Colab_Notebooks/yolo-coco'
-	# Here we can define a single image for test purposes, if you want to check it, you can uncomment below
-  image = cv2.imread('/content/drive/My Drive/Colab_Notebooks/test.jpg')
+
+  # Here we can define a single image for test purposes, if you want to check it, you can uncomment below
+  #image = cv2.imread('/content/drive/My Drive/Colab_Notebooks/test.jpg')
   urlden = 'https://a-team-mall-api.herokuapp.com/density'
   urlmask = 'https://a-team-mall-api.herokuapp.com/mask'
   while True:
     # Here I provided a link from https://www.insecam.org/, which is a good spot from Colorado, USA
-    #cap = cv2.VideoCapture('https://www.insecam.org/en/view/811066/#.Xx5CgDv0_Lk.link')
-    #try:
-    #  _, image = cap.read()
-    #except Exception as e:
-    #  continue
-
+    cap = cv2.VideoCapture('http://14.34.45.49:5000/webcapture.jpg?command=snap&channel=1?1595819773#.Xx5CgNgoHtk.link')
+    try:
+      _, image = cap.read()
+    except Exception as e:
+      continue
     violation, facecount = distvio(image)
     if len(facecount)==0:
         facecountstreaming = {"x": 70, 
